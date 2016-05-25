@@ -35,6 +35,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Locator\ILocator.cs" />
+    <Compile Include="Locator\ILocatorBuilder.cs" />
+    <Compile Include="Locator\IServiceLocator.cs" />
     <Compile Include="Specifications\ExpressionExtension.cs" />
     <Compile Include="Specifications\ISpecification.cs" />
     <Compile Include="Specifications\Specification.cs" />
