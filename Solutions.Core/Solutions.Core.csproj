@@ -46,6 +46,24 @@
     <Compile Include="DAL\IDbConfig.cs" />
     <Compile Include="DAL\IUnitOfWork.cs" />
     <Compile Include="IClearable.cs" />
+    <Compile Include="Queue\Db\DbQueueService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Queue\Db\IQueueRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Queue\Db\QueueItem.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Queue\IQueueService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Queue\Object\ObjectQueueService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Queue\QueueMessage.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Time\TimeService.cs" />
     <Compile Include="Time\ITimeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
