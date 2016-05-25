@@ -2,7 +2,7 @@
 using Autofac;
 using Solutions.Core.Locator;
 
-namespace Solutions.Autofac.Locator
+namespace Solutions.Autofac
 {
     public class AutofacLocator : ILocator
     {

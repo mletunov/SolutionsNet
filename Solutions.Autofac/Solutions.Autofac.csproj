@@ -41,8 +41,8 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Locator\AutofacLocator.cs" />
-    <Compile Include="Locator\AutofacLocatorBuilder.cs" />
+    <Compile Include="AutofacLocator.cs" />
+    <Compile Include="AutofacLocatorBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
