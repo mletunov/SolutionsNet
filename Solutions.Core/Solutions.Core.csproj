@@ -37,6 +37,7 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="IClearable.cs" />
     <Compile Include="Time\TimeService.cs" />
     <Compile Include="Time\ITimeService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
