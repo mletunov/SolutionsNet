@@ -32,11 +32,19 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="DAL\ConcurrencyException.cs" />
+    <Compile Include="DAL\IConcurrencyItem.cs" />
+    <Compile Include="DAL\IConnectionSource.cs" />
+    <Compile Include="DAL\IDataManager.cs" />
+    <Compile Include="DAL\IDataManagerFactory.cs" />
+    <Compile Include="DAL\IDbConfig.cs" />
+    <Compile Include="DAL\IUnitOfWork.cs" />
     <Compile Include="IClearable.cs" />
     <Compile Include="Time\TimeService.cs" />
     <Compile Include="Time\ITimeService.cs" />
