@@ -45,6 +45,7 @@
     <Compile Include="DAL\IDataManagerFactory.cs" />
     <Compile Include="DAL\IDbConfig.cs" />
     <Compile Include="DAL\IUnitOfWork.cs" />
+    <Compile Include="Functional.cs" />
     <Compile Include="IClearable.cs" />
     <Compile Include="Queue\Db\DbQueueService.cs">
       <SubType>Code</SubType>
