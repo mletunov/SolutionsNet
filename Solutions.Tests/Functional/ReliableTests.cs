@@ -66,15 +66,8 @@ namespace Solutions.Tests.Functional
             Func.Reliable(successFunc, ex => true, delay, new CancellationToken());
             Assert.IsFalse(delayIsCalled);
 
-            try
-            {
-                Func.Reliable(failFunc, ex => false, delay, new CancellationToken());
-                Assert.IsFalse(delayIsCalled);
-            }
-            catch (Exception ex)
-            {
-                Assert.AreSame(exception, ex);
-            }
+            var thrown = Assert.Throws<Exception>(() => Func.Reliable(failFunc, ex => false, delay, new CancellationToken()));
+            Assert.AreSame(exception, thrown);
 
             Func.Reliable(failFunc, ex => true, delay, new CancellationToken());
             Assert.IsTrue(delayIsCalled);
@@ -141,25 +134,12 @@ namespace Solutions.Tests.Functional
                 throw exception;
             };
 
-            try
-            {
-                Func.Reliable(func, null, null, new CancellationToken());
-                Assert.Fail();
-            }
-            catch (Exception ex)
-            {
-                Assert.AreSame(exception, ex);
-            }
 
-            try
-            {
-                Func.Reliable(func, ex => false, null, new CancellationToken());
-                Assert.Fail();
-            }
-            catch (Exception ex)
-            {
-                Assert.AreSame(exception, ex);
-            }
+            var thrown = Assert.Throws<Exception>(() => Func.Reliable(func, null, null, new CancellationToken()));
+            Assert.AreSame(exception, thrown);
+
+            thrown = Assert.Throws<Exception>(() => Func.Reliable(func, ex => false, null, new CancellationToken()));
+            Assert.AreSame(exception, thrown);
         }
     }
 }

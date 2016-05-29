@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Solutions.Core
 {
@@ -33,5 +34,32 @@ namespace Solutions.Core
             token.ThrowIfCancellationRequested();
             throw new InvalidOperationException();
         }
-    }
+
+        public static T Wait<T>(Func<CancellationToken, T> func, TimeSpan wait, CancellationToken token)
+        {
+            var source = new CancellationTokenSource();
+            var manual = CancellationTokenSource.CreateLinkedTokenSource(new[] {token});
+            var task = Task.Run(() =>
+            {
+                manual.Token.WaitHandle.WaitOne(wait);
+                source.Cancel();
+            }, token);
+
+            try
+            {
+                var result = func(source.Token);
+                manual.Cancel();
+                task.Wait(token);
+                return result;
+            }
+            catch (OperationCanceledException ex)
+            {
+                token.ThrowIfCancellationRequested();
+                if (ex.CancellationToken == source.Token)
+                    throw new TimeoutException();
+
+                throw;
+            }
+        }        
+    }    
 }
