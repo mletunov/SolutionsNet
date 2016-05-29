@@ -29,7 +29,7 @@ namespace Solutions.Autofac
             this.RegisterInstance(instance).As(type).SingleInstance();
         }
 
-        public ILocator Build()
+        public new ILocator Build()
         {
             ILifetimeScope container;
 
