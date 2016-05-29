@@ -30,7 +30,7 @@ namespace Solutions.Tests.Queue
                 return new NHibernateSessionSource(() => DataManagerFactory.CreateSessionFactory(dbConfig));
             }).As<IConnectionSource<ISession>>().SingleInstance();
 
-            builder.RegisterType<QueueRepository>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<QueueRepository>().As<IQueueRepository>().As<IClearable>().SingleInstance();
             builder.RegisterType<DbQueueService>().As<IQueueService>().SingleInstance();
 
             return builder.Build();

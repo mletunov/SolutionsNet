@@ -70,7 +70,7 @@ namespace Solutions.Tests.Queue
             service.AddMessage(text);
             var message = service.GetMessage(timeout);
             Task.WaitAll(
-                Task.Run(() =>
+                Task.Factory.StartNew(() =>
                 {
                     var count = 0;
                     do
@@ -79,7 +79,7 @@ namespace Solutions.Tests.Queue
                         message = service.PostponeMessage(message, timeout);
                     } while (++count < maxCount);
                 }),
-                Task.Run(() =>
+                Task.Factory.StartNew(() =>
                 {
                     var count = 0;
                     do
@@ -101,7 +101,7 @@ namespace Solutions.Tests.Queue
             service.AddMessage(text2);
             var timeout = TimeSpan.FromSeconds(2);
 
-            var tasks = Enumerable.Range(1, 10).Select(i => Task.Run(() => service.GetMessage(timeout) != null ? 1 : 0))
+            var tasks = Enumerable.Range(1, 10).Select(i => Task.Factory.StartNew(() => service.GetMessage(timeout) != null ? 1 : 0))
                 .ToArray();
             Task.WaitAll(tasks.Cast<Task>().ToArray());
             Assert.AreEqual(2, tasks.Select(t => t.Result).Sum(r => r));

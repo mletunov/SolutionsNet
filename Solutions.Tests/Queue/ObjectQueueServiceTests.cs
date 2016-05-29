@@ -1,6 +1,7 @@
 using Autofac;
 using NUnit.Framework;
 using Solutions.Core;
+using Solutions.Core.Queue;
 using Solutions.Core.Queue.Object;
 
 namespace Solutions.Tests.Queue
@@ -16,7 +17,7 @@ namespace Solutions.Tests.Queue
         private static IContainer InitContainer()
         {
             var builder = new ContainerBuilder();
-            builder.RegisterType<ObjectQueueService>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterType<ObjectQueueService>().As<IQueueService>().As<IClearable>().SingleInstance();
             return builder.Build();
         }
 

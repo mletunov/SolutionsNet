@@ -39,7 +39,7 @@ namespace Solutions.Core
         {
             var source = new CancellationTokenSource();
             var manual = CancellationTokenSource.CreateLinkedTokenSource(new[] {token});
-            var task = Task.Run(() =>
+            var task = Task.Factory.StartNew(() =>
             {
                 manual.Token.WaitHandle.WaitOne(wait);
                 source.Cancel();

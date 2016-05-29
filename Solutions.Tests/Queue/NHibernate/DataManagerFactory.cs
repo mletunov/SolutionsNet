@@ -5,8 +5,10 @@ using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
 using Solutions.Autofac;
+using Solutions.Core;
 using Solutions.Core.DAL;
 using Solutions.Core.Locator;
+using Solutions.Core.Queue.Db;
 using Solutions.NHibernate;
 
 namespace Solutions.Tests.Queue.NHibernate
@@ -34,7 +36,7 @@ namespace Solutions.Tests.Queue.NHibernate
             var builder = new ContainerBuilder();
             
             builder.Register(c => CreateSessionFactory(config()).OpenSession()).InstancePerLifetimeScope();
-            builder.RegisterType<QueueRepository>().AsImplementedInterfaces().InstancePerLifetimeScope();
+            builder.RegisterType<QueueRepository>().As<IQueueRepository>().As<IClearable>().InstancePerLifetimeScope();
 
             return new AutofacLocator(builder.Build());
         }
