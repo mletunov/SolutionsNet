@@ -60,6 +60,27 @@ namespace Solutions.Core
 
                 throw;
             }
-        }        
+        }
+
+        public static Action ToAction<T>(Func<T> func)
+        {
+            return () => func();
+        }
+        public static Func<T> ToFunc<T>(Action action)
+        {
+            return () =>
+            {
+                action();
+                return default(T);
+            };
+        }
+        public static Func<T1, T2> ToFunc<T1, T2>(Action<T1> action)
+        {
+            return t1 =>
+            {
+                action(t1);
+                return default(T2);
+            };
+        }
     }    
 }
