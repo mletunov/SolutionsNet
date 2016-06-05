@@ -94,5 +94,40 @@ namespace Solutions.Core
                 throw;
             }
         }
+
+        public static Tuple<Action, CancellationToken> Heartbeat(Action beat, TimeSpan delay)
+        {
+            var source = new CancellationTokenSource();
+            var manual = new ManualResetEventSlim(false);
+
+            var task = Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    while (!manual.WaitHandle.WaitOne(delay))
+                    {
+                        beat();
+                    }
+                }
+                catch
+                {
+                    source.Cancel();
+                }
+            }, source.Token);
+
+            return new Tuple<Action, CancellationToken>(() =>
+            {
+                manual.Set();
+                task.Wait(source.Token);
+            }, source.Token);
+        }
+        public static T WithHeartbeat<T>(Func<CancellationToken, T> func, Action beat, TimeSpan delay,
+            CancellationToken token)
+        {
+            var heartbeat = Heartbeat(beat, delay);
+            var cancelToken = CancellationTokenSource.CreateLinkedTokenSource(token, heartbeat.Item2).Token;
+
+            return Using(func, heartbeat.Item1, cancelToken);
+        }
     }
 }
