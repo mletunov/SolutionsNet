@@ -66,6 +66,7 @@
     <Compile Include="Queue\QueueMessage.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Reliable\Functional.cs" />
     <Compile Include="Reliable\IDelayStrategy.cs" />
     <Compile Include="Reliable\IReliable.cs" />
     <Compile Include="Reliable\IRetryStrategy.cs" />

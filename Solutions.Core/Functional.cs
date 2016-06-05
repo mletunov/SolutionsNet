@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Solutions.Core
 {
-    public static class Functional
+    public static partial class Functional
     {
         public static Action ToAction<T>(Func<T> func)
         {
@@ -37,35 +37,6 @@ namespace Solutions.Core
         public static T Using<T>(Func<CancellationToken, T> func, Tuple<Action, CancellationToken> tuple)
         {
             return Using(func, tuple.Item1, tuple.Item2);
-        }
-
-        public static T Reliable<T>(Func<T> func, Func<Exception, Boolean> retry,
-            Func<Int32, Exception, TimeSpan?> delay, CancellationToken token)
-        {
-            var count = 0;
-            TimeSpan wait;
-
-            do
-            {
-                try
-                {
-                    return func();
-                }
-                catch (Exception ex)
-                {
-                    if (retry == null || !retry(ex))
-                        throw;
-
-                    var toDelay = delay != null ? delay(count++, ex) : null;
-                    if (toDelay == null)
-                        throw;
-
-                    wait = toDelay.Value;
-                }
-            } while (!token.WaitHandle.WaitOne(wait));
-
-            token.ThrowIfCancellationRequested();
-            throw new InvalidOperationException();
         }
 
         public static T Wait<T>(Func<CancellationToken, T> func, TimeSpan wait, CancellationToken token)
