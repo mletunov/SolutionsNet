@@ -6,6 +6,39 @@ namespace Solutions.Core
 {
     public static class Functional
     {
+        public static Action ToAction<T>(Func<T> func)
+        {
+            return () => func();
+        }
+        public static Func<T> ToFunc<T>(Action action)
+        {
+            return () =>
+            {
+                action();
+                return default(T);
+            };
+        }
+        public static Func<T1, T2> ToFunc<T1, T2>(Action<T1> action)
+        {
+            return t1 =>
+            {
+                action(t1);
+                return default(T2);
+            };
+        }
+
+        public static T Using<T>(Func<CancellationToken, T> func, Action release, CancellationToken token)
+        {
+            using (new Disposable(release))
+            {
+                return func(token);
+            }
+        }
+        public static T Using<T>(Func<CancellationToken, T> func, Tuple<Action, CancellationToken> tuple)
+        {
+            return Using(func, tuple.Item1, tuple.Item2);
+        }
+
         public static T Reliable<T>(Func<T> func, Func<Exception, Boolean> retry,
             Func<Int32, Exception, TimeSpan?> delay, CancellationToken token)
         {
@@ -61,26 +94,5 @@ namespace Solutions.Core
                 throw;
             }
         }
-
-        public static Action ToAction<T>(Func<T> func)
-        {
-            return () => func();
-        }
-        public static Func<T> ToFunc<T>(Action action)
-        {
-            return () =>
-            {
-                action();
-                return default(T);
-            };
-        }
-        public static Func<T1, T2> ToFunc<T1, T2>(Action<T1> action)
-        {
-            return t1 =>
-            {
-                action(t1);
-                return default(T2);
-            };
-        }
-    }    
+    }
 }
