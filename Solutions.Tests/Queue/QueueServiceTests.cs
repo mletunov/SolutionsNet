@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -138,6 +139,26 @@ namespace Solutions.Tests.Queue
             var postponedMessage = service.PostponeMessage(message, timeout);
 
             Assert.AreEqual(text, postponedMessage.Text);
+        }
+
+        [Test]
+        public void TopMessagesProcessedFirst()
+        {
+            var service = container.Resolve<IQueueService>();
+            const Int32 topCount = 10;
+            foreach (var i in Enumerable.Range(1, topCount*2))
+            {
+                service.AddMessage(Convert.ToString(i));
+            }
+
+            var queue = new ConcurrentQueue<QueueMessage>();
+
+            Parallel.ForEach(Enumerable.Range(1, topCount), i =>
+                queue.Enqueue(service.GetMessage(TimeSpan.FromSeconds(30))));
+
+            var messageIds = queue.Where(m => m != null).Select(m => Int32.Parse(m.Text)).ToList();
+            Assert.AreEqual(topCount, messageIds.Count);
+            CollectionAssert.AreEqual(Enumerable.Range(1, topCount), messageIds);
         }
     }
 }

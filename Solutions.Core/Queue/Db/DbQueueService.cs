@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using Solutions.Core.DAL;
 using Solutions.Core.Specifications;
 using Solutions.Core.Time;
@@ -11,12 +13,12 @@ namespace Solutions.Core.Queue.Db
     {
         private readonly Lazy<IQueueRepository> repository;
         private readonly Lazy<ITimeService> timeService;
-        private readonly Lazy<BusyQueueItem> busy;
+        private readonly Lazy<FreeQueueItem> free;
 
-        class BusyQueueItem : Specification<QueueItem>
+        class FreeQueueItem : Specification<QueueItem>
         {
             private readonly Lazy<ITimeService> timeService;
-            public BusyQueueItem(Func<ITimeService> timeService)
+            public FreeQueueItem(Func<ITimeService> timeService)
             {
                 this.timeService = new Lazy<ITimeService>(timeService);
             }
@@ -32,7 +34,7 @@ namespace Solutions.Core.Queue.Db
         {
             this.repository = new Lazy<IQueueRepository>(repository);
             this.timeService = new Lazy<ITimeService>(timeService);
-            busy = new Lazy<BusyQueueItem>(() => new BusyQueueItem(timeService));
+            free = new Lazy<FreeQueueItem>(() => new FreeQueueItem(timeService));
         }
 
         public void AddMessage(String text)
@@ -50,30 +52,20 @@ namespace Solutions.Core.Queue.Db
         {
             Func<QueueMessage> accureMessage = () =>
             {
-                var item = repository.Value.GetList().Where(busy.Value).
-                    OrderBy(i => i.HoldOn).FirstOrDefault();
+                var item = repository.Value.GetList().Where(free.Value).
+                    OrderBy(i => i.HoldOn).ThenBy(i => i.Id).FirstOrDefault();
 
                 if (item == null)
                     return null;
+
+                Debug.WriteLine("Accuire " + item.Text);
 
                 item.HoldOn = timeService.Value.Now + timeout;
                 return repository.Value.Save(item);
             };
 
-            var count = 0;
-            do
-            {
-                try
-                {
-                    return accureMessage();
-                }
-                catch (ConcurrencyException)
-                {
-                    ++count;
-                }
-            } while (count < 3);
-
-            return null;
+            return Functional.Reliable(accureMessage, ex => ex is ConcurrencyException,
+                (i, ex) => TimeSpan.Zero, new CancellationToken());
         }
 
         public QueueMessage PostponeMessage(QueueMessage message, TimeSpan timeout)
