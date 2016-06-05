@@ -38,9 +38,8 @@ namespace Solutions.Core.Queue.Db
 
         public void AddMessage(String text)
         {
-            var item = new QueueItem
-            {
-                Text = text,
+            var item = new QueueItem(text)
+            {                
                 HoldOn = timeService.Value.Now
             };
 

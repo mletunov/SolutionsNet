@@ -22,10 +22,9 @@ namespace Solutions.Tests.Queue.NHibernate
         }
         public static explicit operator QueueItem(QueueItemDto item)
         {
-            return new QueueItem
+            return new QueueItem(item.Text)
             {
-                Id = item.Id,
-                Text = item.Text,
+                Id = item.Id,                
                 HoldOn = item.HoldOn,
                 Version = Convert.ToBase64String(item.Version)
             };

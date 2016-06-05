@@ -124,24 +124,6 @@ namespace Solutions.Tests.Queue
         }
 
         [Test]
-        public void PostponeDoesnotUpdateMessage()
-        {
-            var service = container.Resolve<IQueueService>();
-
-            const String text = "TestMessage";
-            const String newText = "NewMessage";
-            var timeout = TimeSpan.FromSeconds(2);
-
-            service.AddMessage(text);
-            var message = service.GetMessage(timeout);
-
-            message.Text = newText;
-            var postponedMessage = service.PostponeMessage(message, timeout);
-
-            Assert.AreEqual(text, postponedMessage.Text);
-        }
-
-        [Test]
         public void PostponeConcurrency()
         {
             var service = container.Resolve<IQueueService>();

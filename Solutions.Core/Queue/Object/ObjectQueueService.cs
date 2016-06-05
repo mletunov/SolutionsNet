@@ -19,7 +19,7 @@ namespace Solutions.Core.Queue.Object
             }
             public QueueMessage UpdateMessage()
             {
-                Message = new QueueMessage {Text = text};
+                Message = new QueueMessage(text);
                 return Message;
             }
         }
