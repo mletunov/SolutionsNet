@@ -48,6 +48,12 @@
     <Compile Include="Disposable.cs" />
     <Compile Include="Functional.cs" />
     <Compile Include="IClearable.cs" />
+    <Compile Include="Lock\Functional.cs" />
+    <Compile Include="Lock\ILockService.cs" />
+    <Compile Include="Lock\ILock.cs" />
+    <Compile Include="Lock\ILockServiceFactory.cs" />
+    <Compile Include="Lock\LockService.cs" />
+    <Compile Include="Lock\ObjectLockServiceFactory.cs" />
     <Compile Include="Queue\Db\DbQueueService.cs">
       <SubType>Code</SubType>
     </Compile>
