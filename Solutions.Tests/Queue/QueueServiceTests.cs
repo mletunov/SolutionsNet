@@ -142,6 +142,24 @@ namespace Solutions.Tests.Queue
         }
 
         [Test]
+        public void PostponeConcurrency()
+        {
+            var service = container.Resolve<IQueueService>();
+
+            const String text = "TestMessage";
+            var timeout = TimeSpan.FromSeconds(1);
+
+            service.AddMessage(text);
+            var firstMessage = service.GetMessage(timeout);
+
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+            var secondMessage = service.GetMessage(timeout);
+
+            Assert.NotNull(secondMessage);
+            Assert.That(() => service.PostponeMessage(firstMessage, timeout), Throws.Exception);
+        }
+
+        [Test]
         public void TopMessagesProcessedFirst()
         {
             var service = container.Resolve<IQueueService>();

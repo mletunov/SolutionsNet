@@ -6,7 +6,7 @@ using System.Linq;
 namespace Solutions.Core.Queue.Object
 {
     public class ObjectQueueService : IQueueService, IClearable
-    {        
+    {
         class InnerMessage
         {
             public DateTime HoldOn { get; set; }
@@ -19,7 +19,7 @@ namespace Solutions.Core.Queue.Object
             }
             public QueueMessage UpdateMessage()
             {
-                Message = new QueueMessage { Text = text };
+                Message = new QueueMessage {Text = text};
                 return Message;
             }
         }

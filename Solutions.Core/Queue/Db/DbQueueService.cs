@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -58,8 +57,6 @@ namespace Solutions.Core.Queue.Db
                 if (item == null)
                     return null;
 
-                Debug.WriteLine("Accuire " + item.Text);
-
                 item.HoldOn = timeService.Value.Now + timeout;
                 return repository.Value.Save(item);
             };
@@ -70,7 +67,10 @@ namespace Solutions.Core.Queue.Db
 
         public QueueMessage PostponeMessage(QueueMessage message, TimeSpan timeout)
         {
-            var item = repository.Value.Get(((QueueItem) message).Id);
+            var sourceItem = (QueueItem) message;
+            var item = repository.Value.Get(sourceItem.Id);
+
+            item.Version = sourceItem.Version;
             item.HoldOn = timeService.Value.Now + timeout;
 
             return repository.Value.Save(item);
