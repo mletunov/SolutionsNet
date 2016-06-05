@@ -87,6 +87,9 @@
     <Compile Include="Specifications\ISpecification.cs" />
     <Compile Include="Specifications\Specification.cs" />
     <Compile Include="Specifications\SpecificationExtension.cs" />
+    <Compile Include="Worker\FixedDelayScheduler.cs" />
+    <Compile Include="Worker\IScheduler.cs" />
+    <Compile Include="Worker\Worker.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
