@@ -86,17 +86,17 @@
     <Compile Include="StubFactory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Solutions.Autofac\Solutions.Autofac.csproj">
+    <ProjectReference Include="..\Solutions.Autofac\Solutions.Autofac.4.0.csproj">
       <Project>{4BCBDBC1-F83B-4666-A0CC-D05DB17509FE}</Project>
-      <Name>Solutions.Autofac</Name>
+      <Name>Solutions.Autofac.4.0</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Solutions.Core\Solutions.Core.csproj">
+    <ProjectReference Include="..\Solutions.Core\Solutions.Core.4.0.csproj">
       <Project>{9E07C2CB-B04A-4BD0-B516-9229068B103F}</Project>
-      <Name>Solutions.Core</Name>
+      <Name>Solutions.Core.4.0</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Solutions.NHibernate\Solutions.NHibernate.csproj">
+    <ProjectReference Include="..\Solutions.NHibernate\Solutions.NHibernate.4.0.csproj">
       <Project>{01E82D15-3DFC-4544-B816-23F85B7E4248}</Project>
-      <Name>Solutions.NHibernate</Name>
+      <Name>Solutions.NHibernate.4.0</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

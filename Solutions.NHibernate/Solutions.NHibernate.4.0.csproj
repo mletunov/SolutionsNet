@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4BCBDBC1-F83B-4666-A0CC-D05DB17509FE}</ProjectGuid>
+    <ProjectGuid>{01E82D15-3DFC-4544-B816-23F85B7E4248}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Solutions.Autofac</RootNamespace>
-    <AssemblyName>Solutions.Autofac</AssemblyName>
+    <RootNamespace>Solutions.NHibernate</RootNamespace>
+    <AssemblyName>Solutions.NHibernate</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -16,7 +16,8 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\4.0\Debug</OutputPath>
+    <BaseIntermediateOutputPath>obj\4.0</BaseIntermediateOutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,35 +25,50 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\4.0\Release</OutputPath>
+    <BaseIntermediateOutputPath>obj\4.0</BaseIntermediateOutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v2.0' ">V2_0</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">V4_0</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">V4_5</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.6' ">V4_6</CustomConstants>
+    <DefineConstants Condition=" '$(DefineConstants)' != '' And '$(CustomConstants)' != '' ">$(DefineConstants);</DefineConstants>
+    <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=2.2.4.900, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autofac.2.2.4.900\lib\NET40\Autofac.dll</HintPath>
+    <Reference Include="Iesi.Collections, Version=4.0.0.0, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Iesi.Collections.4.0.0.4000\lib\net40\Iesi.Collections.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NHibernate, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
+      <HintPath>..\packages\NHibernate.4.0.0.4000\lib\net40\NHibernate.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AutofacLocator.cs" />
-    <Compile Include="AutofacLocatorBuilder.cs" />
+    <Compile Include="NHibernateDataManager.cs" />
+    <Compile Include="NHibernateDataManagerFactory.cs" />
+    <Compile Include="NHibernateSessionSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Solutions.Core\Solutions.Core.csproj">
+    <ProjectReference Include="..\Solutions.Core\Solutions.Core.4.0.csproj">
       <Project>{9E07C2CB-B04A-4BD0-B516-9229068B103F}</Project>
-      <Name>Solutions.Core</Name>
+      <Name>Solutions.Core.4.0</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages4.0.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

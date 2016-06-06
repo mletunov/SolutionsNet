@@ -4,19 +4,20 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9E07C2CB-B04A-4BD0-B516-9229068B103F}</ProjectGuid>
+    <ProjectGuid>{3709734C-DAEA-4165-A972-B0B1204D6F44}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Solutions.Core</RootNamespace>
     <AssemblyName>Solutions.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\4.5\Debug</OutputPath>
+    <BaseIntermediateOutputPath>obj\4.5</BaseIntermediateOutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -24,10 +25,19 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\4.5\Release</OutputPath>
+    <BaseIntermediateOutputPath>obj\4.5</BaseIntermediateOutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v2.0' ">V2_0</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">V4_0</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">V4_5</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.6' ">V4_6</CustomConstants>
+    <DefineConstants Condition=" '$(DefineConstants)' != '' And '$(CustomConstants)' != '' ">$(DefineConstants);</DefineConstants>
+    <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -48,45 +58,33 @@
     <Compile Include="Disposable.cs" />
     <Compile Include="Functional.cs" />
     <Compile Include="IClearable.cs" />
+    <Compile Include="Locator\ILocator.cs" />
+    <Compile Include="Locator\ILocatorBuilder.cs" />
+    <Compile Include="Locator\IServiceLocator.cs" />
     <Compile Include="Lock\Functional.cs" />
-    <Compile Include="Lock\ILockService.cs" />
     <Compile Include="Lock\ILock.cs" />
+    <Compile Include="Lock\ILockService.cs" />
     <Compile Include="Lock\ILockServiceFactory.cs" />
     <Compile Include="Lock\LockService.cs" />
     <Compile Include="Lock\ObjectLockServiceFactory.cs" />
-    <Compile Include="Queue\Db\DbQueueService.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Queue\Db\IQueueRepository.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Queue\Db\QueueItem.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Queue\IQueueService.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Queue\Object\ObjectQueueService.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Queue\QueueMessage.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Queue\Db\DbQueueService.cs" />
+    <Compile Include="Queue\Db\IQueueRepository.cs" />
+    <Compile Include="Queue\Db\QueueItem.cs" />
+    <Compile Include="Queue\IQueueService.cs" />
+    <Compile Include="Queue\Object\ObjectQueueService.cs" />
+    <Compile Include="Queue\QueueMessage.cs" />
     <Compile Include="Reliable\Functional.cs" />
     <Compile Include="Reliable\IDelayStrategy.cs" />
     <Compile Include="Reliable\IReliable.cs" />
     <Compile Include="Reliable\IRetryStrategy.cs" />
     <Compile Include="Reliable\Reliable.cs" />
-    <Compile Include="Time\TimeService.cs" />
-    <Compile Include="Time\ITimeService.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Locator\ILocator.cs" />
-    <Compile Include="Locator\ILocatorBuilder.cs" />
-    <Compile Include="Locator\IServiceLocator.cs" />
     <Compile Include="Specifications\ExpressionExtension.cs" />
     <Compile Include="Specifications\ISpecification.cs" />
     <Compile Include="Specifications\Specification.cs" />
     <Compile Include="Specifications\SpecificationExtension.cs" />
+    <Compile Include="Time\ITimeService.cs" />
+    <Compile Include="Time\TimeService.cs" />
     <Compile Include="Worker\FixedDelayScheduler.cs" />
     <Compile Include="Worker\IScheduler.cs" />
     <Compile Include="Worker\Worker.cs" />

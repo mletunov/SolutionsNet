@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4BCBDBC1-F83B-4666-A0CC-D05DB17509FE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Solutions.Autofac</RootNamespace>
+    <AssemblyName>Solutions.Autofac</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\4.0\Debug</OutputPath>
+    <BaseIntermediateOutputPath>obj\4.0</BaseIntermediateOutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\4.0\Release</OutputPath>
+    <BaseIntermediateOutputPath>obj\4.0</BaseIntermediateOutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v2.0' ">V2_0</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">V4_0</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.5' ">V4_5</CustomConstants>
+    <CustomConstants Condition=" '$(TargetFrameworkVersion)' == 'v4.6' ">V4_6</CustomConstants>
+    <DefineConstants Condition=" '$(DefineConstants)' != '' And '$(CustomConstants)' != '' ">$(DefineConstants);</DefineConstants>
+    <DefineConstants>$(DefineConstants)$(CustomConstants)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Autofac, Version=2.2.4.900, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autofac.2.2.4.900\lib\NET40\Autofac.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="AutofacLocator.cs" />
+    <Compile Include="AutofacLocatorBuilder.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Solutions.Core\Solutions.Core.4.0.csproj">
+      <Project>{9E07C2CB-B04A-4BD0-B516-9229068B103F}</Project>
+      <Name>Solutions.Core.4.0</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages4.0.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

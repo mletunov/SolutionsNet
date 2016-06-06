@@ -35,7 +35,11 @@ namespace Solutions.Core.Worker
                 {
 
                     status.Source = new CancellationTokenSource();
+#if !V4_0
+                    status.Action = Task.Run(() =>
+#else
                     status.Action = Task.Factory.StartNew(() =>
+#endif
                     {
                         var next = scheduler.Value.Next();
                         while (!status.Source.Token.WaitHandle.WaitOne(next.Item1))

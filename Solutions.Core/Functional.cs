@@ -43,7 +43,11 @@ namespace Solutions.Core
         {
             var source = new CancellationTokenSource();
             var manual = CancellationTokenSource.CreateLinkedTokenSource(new[] {token});
+#if !V4_0
+            var task = Task.Run(() =>
+#else
             var task = Task.Factory.StartNew(() =>
+#endif
             {
                 manual.Token.WaitHandle.WaitOne(wait);
                 source.Cancel();
@@ -71,7 +75,11 @@ namespace Solutions.Core
             var source = new CancellationTokenSource();
             var manual = new ManualResetEventSlim(false);
 
+#if !V4_0
+            var task = Task.Run(() => 
+#else
             var task = Task.Factory.StartNew(() =>
+#endif
             {
                 try
                 {

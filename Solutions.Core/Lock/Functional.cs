@@ -22,8 +22,11 @@ namespace Solutions.Core
         public static Action Delayed(Action action, TimeSpan delay, CancellationToken token)
         {
             var manual = new ManualResetEventSlim(false);
-
+#if !V4_0
+            Task.Run(() => 
+#else
             Task.Factory.StartNew(() =>
+#endif
             {
                 if (!token.WaitHandle.WaitOne(delay))
                     manual.Set();
@@ -32,8 +35,12 @@ namespace Solutions.Core
             return Delayed(action, manual.WaitHandle, token);
         }
         public static Action Delayed(Action action, WaitHandle delayHandle, CancellationToken token)
-        {            
+        {
+#if !V4_0
+            return () => Task.Run(() =>
+#else
             return () => Task.Factory.StartNew(() =>
+#endif
             {
                 while (!delayHandle.WaitOne(TimeSpan.FromSeconds(1)))
                 {
