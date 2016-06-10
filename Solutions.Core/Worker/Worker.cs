@@ -5,64 +5,124 @@ using System.Threading.Tasks;
 namespace Solutions.Core.Worker
 {
     public class Worker
-    {
-        class Status
+    {       
+        public enum StatusType
         {
-            public CancellationTokenSource Source { get; set; }
-            public Task Action { get; set; }
-
-            public Boolean IsRunning()
-            {
-                return Action != null && !Action.IsCompleted &&
-                       Source != null && !Source.IsCancellationRequested;
-            }
+            Ready,
+            Running,
+            Pending,
+            Cancelling,
         }
 
         private readonly Lazy<IScheduler> scheduler;
-        private readonly Status status;
+        private readonly Action<CancellationToken> prepare;
+
+        private Task task;
+        private CancellationTokenSource cancellation;
+        public StatusType Status { get; private set; }
 
         public Worker(Func<IScheduler> scheduler)
+            : this(scheduler, token => { })
         {
-            this.scheduler = new Lazy<IScheduler>(scheduler);
-            status = new Status();
         }
 
-        public void Start()
+        public Worker(Func<IScheduler> scheduler, Action<CancellationToken> prepare)
         {
-            lock (status)
-            {
-                if (!status.IsRunning())
-                {
+            this.prepare = prepare;
+            this.scheduler = new Lazy<IScheduler>(scheduler);
+            Status = StatusType.Ready;
+        }
 
-                    status.Source = new CancellationTokenSource();
-#if !V4_0
-                    status.Action = Task.Run(() =>
-#else
-                    status.Action = Task.Factory.StartNew(() =>
-#endif
+        private Action Execute()
+        {
+            return () =>
+            {
+                try
+                {
+                    prepare(cancellation.Token);
+                    Status = StatusType.Running;
+                
+                    var next = scheduler.Value.Next();
+                    while (!cancellation.Token.WaitHandle.WaitOne(next.Item1))
                     {
-                        var next = scheduler.Value.Next();
-                        while (!status.Source.Token.WaitHandle.WaitOne(next.Item1))
-                        {
-                            next.Item2(status.Source.Token);
-                            next = scheduler.Value.Next();
-                        }
-                    });
+                        next.Item2(cancellation.Token);
+                        next = scheduler.Value.Next();
+                    }
+                }
+                finally
+                {
+                    Status = StatusType.Ready;
+                }
+            };
+        }
+
+#if !V4_0
+        public async Task Start()
+        {
+            lock (scheduler)
+            {
+                if (Status == StatusType.Ready)
+                {
+                    Status = StatusType.Pending;
+                    cancellation = new CancellationTokenSource();
+
+                    task = Task.Run(Execute());
                 }
             }
 
-            status.Action.Wait();
+            await task;           
         }
-        public void Stop()
+
+        public async Task Stop()
         {
-            lock (status)
+            lock (scheduler)
             {
-                if (status.Source != null)
-                    status.Source.Cancel();                
+                if (Status == StatusType.Running || Status == StatusType.Pending)
+                {
+                    Status = StatusType.Cancelling;
+                    cancellation.Cancel();
+                }
             }
 
-            if (status.Action != null)
-                status.Action.Wait();
+            await task;
         }
+#else
+        public Task Start()
+        {
+            lock (scheduler)
+            {
+                if (Status != StatusType.Ready)
+                    return task;
+
+                Status = StatusType.Pending;
+                cancellation = new CancellationTokenSource();
+
+                return task = Task.Factory.StartNew(() =>
+                {
+                    Status = StatusType.Running;
+                    var next = scheduler.Value.Next();
+                    while (!cancellation.Token.WaitHandle.WaitOne(next.Item1))
+                    {
+                        next.Item2(cancellation.Token);
+                        next = scheduler.Value.Next();
+                    }
+                    Status = StatusType.Ready;
+                });
+            }
+        }
+
+        public Task Stop()
+        {
+            lock (scheduler)
+            {
+                if (Status != StatusType.Running && Status != StatusType.Pending)
+                    return task;
+
+                Status = StatusType.Cancelling;
+                cancellation.Cancel();
+                return task;
+            }
+        }
+#endif
     }
 }
