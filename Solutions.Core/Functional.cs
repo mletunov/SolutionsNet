@@ -39,7 +39,22 @@ namespace Solutions.Core
             return Using(func, tuple.Item1, tuple.Item2);
         }
 
-        public static T Wait<T>(Func<CancellationToken, T> func, TimeSpan wait, CancellationToken token)
+        /// <summary> Make exception tolerance action </summary>        
+        public static Exception Safe(Action action)
+        {
+            try
+            {
+                action();
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
+        }
+
+        /// <summary> Soft wait. Stops func via cancellation token </summary>
+        public static T Wait<T>(Func<CancellationToken, T> func, TimeSpan timeout, CancellationToken token)
         {
             var source = new CancellationTokenSource();
             var manual = CancellationTokenSource.CreateLinkedTokenSource(new[] {token});
@@ -49,7 +64,7 @@ namespace Solutions.Core
             var task = Task.Factory.StartNew(() =>
 #endif
             {
-                manual.Token.WaitHandle.WaitOne(wait);
+                manual.Token.WaitHandle.WaitOne(timeout);
                 source.Cancel();
             }, token);
 
@@ -68,6 +83,29 @@ namespace Solutions.Core
 
                 throw;
             }
+        }
+        /// <summary> Hard wait. Stops func immediately aborting thread </summary>
+        public static T Wait<T>(Func<T> func, TimeSpan timeout)
+        {
+            Func<CancellationToken, T> innerFunc = token =>
+            {
+                Exception exception = null;
+                var result = default(T);
+                var thread = new Thread(() => exception = Safe(() => result = func()));
+                thread.Start();
+                var finished = thread.Join(timeout);
+
+                if (!finished)
+                    thread.Abort();
+
+                token.ThrowIfCancellationRequested();
+                if (exception != null)
+                    throw exception;
+
+                return result;
+            };
+
+            return Wait(innerFunc, timeout, new CancellationToken());
         }
 
         public static Tuple<Action, CancellationToken> Heartbeat(Action beat, TimeSpan delay)

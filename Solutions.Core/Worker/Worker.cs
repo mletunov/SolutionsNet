@@ -8,7 +8,7 @@ namespace Solutions.Core.Worker
     {       
         public enum StatusType
         {
-            Ready,
+            Idle,
             Running,
             Pending,
             Cancelling,
@@ -30,7 +30,7 @@ namespace Solutions.Core.Worker
         {
             this.prepare = prepare;
             this.scheduler = new Lazy<IScheduler>(scheduler);
-            Status = StatusType.Ready;
+            Status = StatusType.Idle;
         }
 
         private Action Execute()
@@ -51,7 +51,7 @@ namespace Solutions.Core.Worker
                 }
                 finally
                 {
-                    Status = StatusType.Ready;
+                    Status = StatusType.Idle;
                 }
             };
         }
@@ -61,7 +61,7 @@ namespace Solutions.Core.Worker
         {
             lock (scheduler)
             {
-                if (Status == StatusType.Ready)
+                if (Status == StatusType.Idle)
                 {
                     Status = StatusType.Pending;
                     cancellation = new CancellationTokenSource();
@@ -91,23 +91,13 @@ namespace Solutions.Core.Worker
         {
             lock (scheduler)
             {
-                if (Status != StatusType.Ready)
+                if (Status != StatusType.Idle)
                     return task;
 
                 Status = StatusType.Pending;
                 cancellation = new CancellationTokenSource();
 
-                return task = Task.Factory.StartNew(() =>
-                {
-                    Status = StatusType.Running;
-                    var next = scheduler.Value.Next();
-                    while (!cancellation.Token.WaitHandle.WaitOne(next.Item1))
-                    {
-                        next.Item2(cancellation.Token);
-                        next = scheduler.Value.Next();
-                    }
-                    Status = StatusType.Ready;
-                });
+                return task = Task.Factory.StartNew(Execute());
             }
         }
 
