@@ -4,33 +4,37 @@ using System.Threading.Tasks;
 
 namespace Solutions.Core.Worker
 {
-    public class Worker
+    public class Worker : IWorker
     {       
-        public enum StatusType
-        {
-            Idle,
-            Running,
-            Pending,
-            Cancelling,
-        }
-
-        private readonly Lazy<IScheduler> scheduler;
+        private readonly Func<TimeSpan> trigger;
         private readonly Action<CancellationToken> prepare;
+        private readonly Func<CancellationToken, Boolean> func;
 
         private Task task;
         private CancellationTokenSource cancellation;
-        public StatusType Status { get; private set; }
+        public WorkerStatus Status { get; private set; }
 
-        public Worker(Func<IScheduler> scheduler)
-            : this(scheduler, token => { })
-        {
-        }
+        private Object critical = new Object();
 
-        public Worker(Func<IScheduler> scheduler, Action<CancellationToken> prepare)
+        public Worker(ITrigger trigger, Func<CancellationToken, Boolean> func)
+            : this(trigger, func, token => { })
+        { }
+
+        public Worker(Func<TimeSpan> trigger, Func<CancellationToken, Boolean> func)
+            : this(trigger, func, token => { })
+        { }
+
+        public Worker(ITrigger trigger, Func<CancellationToken, Boolean> func, Action<CancellationToken> prepare)
+            : this(trigger.Next, func, prepare)
+        { }
+
+        public Worker(Func<TimeSpan> trigger, Func<CancellationToken, Boolean> func, Action<CancellationToken> prepare)
         {
             this.prepare = prepare;
-            this.scheduler = new Lazy<IScheduler>(scheduler);
-            Status = StatusType.Idle;
+            this.func = func;
+            this.trigger = trigger;
+
+            Status = WorkerStatus.Idle;
         }
 
         private Action Execute()
@@ -40,18 +44,14 @@ namespace Solutions.Core.Worker
                 try
                 {
                     prepare(cancellation.Token);
-                    Status = StatusType.Running;
-                
-                    var next = scheduler.Value.Next();
-                    while (!cancellation.Token.WaitHandle.WaitOne(next.Item1))
-                    {
-                        next.Item2(cancellation.Token);
-                        next = scheduler.Value.Next();
-                    }
+                    Status = WorkerStatus.Running;
+
+                    while (!cancellation.Token.WaitHandle.WaitOne(trigger()))
+                        func(cancellation.Token);
                 }
                 finally
                 {
-                    Status = StatusType.Idle;
+                    Status = WorkerStatus.Idle;
                 }
             };
         }
@@ -59,11 +59,11 @@ namespace Solutions.Core.Worker
 #if !V4_0
         public async Task Start()
         {
-            lock (scheduler)
+            lock (critical)
             {
-                if (Status == StatusType.Idle)
+                if (Status == WorkerStatus.Idle)
                 {
-                    Status = StatusType.Pending;
+                    Status = WorkerStatus.Pending;
                     cancellation = new CancellationTokenSource();
 
                     task = Task.Run(Execute());
@@ -75,11 +75,11 @@ namespace Solutions.Core.Worker
 
         public async Task Stop()
         {
-            lock (scheduler)
+            lock (critical)
             {
-                if (Status == StatusType.Running || Status == StatusType.Pending)
+                if (Status == WorkerStatus.Running || Status == WorkerStatus.Pending)
                 {
-                    Status = StatusType.Cancelling;
+                    Status = WorkerStatus.Cancelling;
                     cancellation.Cancel();
                 }
             }
@@ -89,12 +89,12 @@ namespace Solutions.Core.Worker
 #else
         public Task Start()
         {
-            lock (scheduler)
+            lock (critical)
             {
-                if (Status != StatusType.Idle)
+                if (Status != WorkerStatus.Idle)
                     return task;
 
-                Status = StatusType.Pending;
+                Status = WorkerStatus.Pending;
                 cancellation = new CancellationTokenSource();
 
                 return task = Task.Factory.StartNew(Execute());
@@ -103,12 +103,12 @@ namespace Solutions.Core.Worker
 
         public Task Stop()
         {
-            lock (scheduler)
+            lock (critical)
             {
-                if (Status != StatusType.Running && Status != StatusType.Pending)
+                if (Status != WorkerStatus.Running && Status != WorkerStatus.Pending)
                     return task;
 
-                Status = StatusType.Cancelling;
+                Status = WorkerStatus.Cancelling;
                 cancellation.Cancel();
                 return task;
             }

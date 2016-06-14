@@ -36,21 +36,21 @@ namespace Solutions.Tests.Worker
                     manual.Reset();
                 });
 
-            Assert.AreEqual(Core.Worker.Worker.StatusType.Idle, worker.Status);
+            Assert.AreEqual(WorkerStatus.Idle, worker.Status);
 
             Core.Functional.Wait(worker.Start, TimeSpan.FromSeconds(5));
-            Assert.AreEqual(Core.Worker.Worker.StatusType.Pending, worker.Status);
+            Assert.AreEqual(WorkerStatus.Pending, worker.Status);
 
             manual.Set();
             Thread.Sleep(TimeSpan.FromSeconds(1));
-            Assert.AreEqual(Core.Worker.Worker.StatusType.Running, worker.Status);
+            Assert.AreEqual(WorkerStatus.Running, worker.Status);
 
             Core.Functional.Wait(worker.Stop, TimeSpan.FromSeconds(5));
-            Assert.AreEqual(Core.Worker.Worker.StatusType.Cancelling, worker.Status);
+            Assert.AreEqual(WorkerStatus.Cancelling, worker.Status);
 
             manual.Set();
             Thread.Sleep(TimeSpan.FromSeconds(1));
-            Assert.AreEqual(Core.Worker.Worker.StatusType.Idle, worker.Status);
+            Assert.AreEqual(WorkerStatus.Idle, worker.Status);
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace Solutions.Tests.Worker
                 worker.Start().Wait(TimeSpan.FromSeconds(5)));
 
             Assert.AreSame(exception, thrown.InnerExceptions.First());
-            Assert.AreEqual(Core.Worker.Worker.StatusType.Idle, worker.Status);
+            Assert.AreEqual(WorkerStatus.Idle, worker.Status);
         }
 
         [Test]
@@ -82,13 +82,15 @@ namespace Solutions.Tests.Worker
                 worker.Start().Wait(TimeSpan.FromSeconds(5)));
 
             Assert.AreSame(exception, thrown.InnerExceptions.First());
-            Assert.AreEqual(Core.Worker.Worker.StatusType.Idle, worker.Status);
+            Assert.AreEqual(WorkerStatus.Idle, worker.Status);
         }
 
-        private Core.Worker.Worker GetWorker(Func<CancellationToken, Boolean> func, TimeSpan delay, Action<CancellationToken> prepare = null)
+        private static IWorker GetWorker(Func<CancellationToken, Boolean> func, TimeSpan delay,
+            Action<CancellationToken> prepare = null)
         {
-            var scheduler = new FixedDelayScheduler(func, delay);
-            return new Core.Worker.Worker(() => scheduler, prepare ?? (token => { }));
+            var counter = 0;
+            var trigger = new Trigger(() => counter++ == 0 ? TimeSpan.Zero : delay);
+            return new Core.Worker.Worker(trigger, func, prepare ?? (token => { }));
         }
     }
 }
