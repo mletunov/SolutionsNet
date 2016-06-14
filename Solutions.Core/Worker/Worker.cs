@@ -8,30 +8,30 @@ namespace Solutions.Core.Worker
     {       
         private readonly Func<TimeSpan> trigger;
         private readonly Action<CancellationToken> prepare;
-        private readonly Func<CancellationToken, Boolean> func;
+        private readonly Action<CancellationToken> action;
 
         private Task task;
         private CancellationTokenSource cancellation;
         public WorkerStatus Status { get; private set; }
 
-        private Object critical = new Object();
+        private readonly Object critical = new Object();
 
-        public Worker(ITrigger trigger, Func<CancellationToken, Boolean> func)
-            : this(trigger, func, token => { })
+        public Worker(ITrigger trigger, Action<CancellationToken> action)
+            : this(trigger, action, token => { })
         { }
 
-        public Worker(Func<TimeSpan> trigger, Func<CancellationToken, Boolean> func)
-            : this(trigger, func, token => { })
+        public Worker(Func<TimeSpan> trigger, Action<CancellationToken> action)
+            : this(trigger, action, token => { })
         { }
 
-        public Worker(ITrigger trigger, Func<CancellationToken, Boolean> func, Action<CancellationToken> prepare)
-            : this(trigger.Next, func, prepare)
+        public Worker(ITrigger trigger, Action<CancellationToken> action, Action<CancellationToken> prepare)
+            : this(trigger.Next, action, prepare)
         { }
 
-        public Worker(Func<TimeSpan> trigger, Func<CancellationToken, Boolean> func, Action<CancellationToken> prepare)
+        public Worker(Func<TimeSpan> trigger, Action<CancellationToken> action, Action<CancellationToken> prepare)
         {
             this.prepare = prepare;
-            this.func = func;
+            this.action = action;
             this.trigger = trigger;
 
             Status = WorkerStatus.Idle;
@@ -47,7 +47,7 @@ namespace Solutions.Core.Worker
                     Status = WorkerStatus.Running;
 
                     while (!cancellation.Token.WaitHandle.WaitOne(trigger()))
-                        func(cancellation.Token);
+                        action(cancellation.Token);
                 }
                 finally
                 {

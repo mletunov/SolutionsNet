@@ -12,14 +12,14 @@ namespace Solutions.Tests.Worker
         [Test]
         public void NonBlockingStart()
         {
-            var worker = GetWorker(token => true, TimeSpan.FromMinutes(1));
+            var worker = GetWorker(token => { }, TimeSpan.FromMinutes(1));
             Core.Functional.Wait(worker.Start, TimeSpan.FromSeconds(5));
         }
 
         [Test]
         public void NonBlockingStop()
         {
-            var worker = GetWorker(token => true, TimeSpan.FromMinutes(1));
+            var worker = GetWorker(token => { }, TimeSpan.FromMinutes(1));
             Core.Functional.Wait(worker.Start, TimeSpan.FromSeconds(5));
             Core.Functional.Wait(worker.Stop, TimeSpan.FromSeconds(5));
         }
@@ -57,7 +57,7 @@ namespace Solutions.Tests.Worker
         public void PrepareExceptionStops()
         {
             var exception = new Exception();
-            var worker = GetWorker(token => true, TimeSpan.FromMinutes(1), token =>
+            var worker = GetWorker(token => { }, TimeSpan.FromMinutes(1), token =>
             {
                 throw exception;
             });
@@ -85,12 +85,12 @@ namespace Solutions.Tests.Worker
             Assert.AreEqual(WorkerStatus.Idle, worker.Status);
         }
 
-        private static IWorker GetWorker(Func<CancellationToken, Boolean> func, TimeSpan delay,
+        private static IWorker GetWorker(Action<CancellationToken> action, TimeSpan delay,
             Action<CancellationToken> prepare = null)
         {
             var counter = 0;
             var trigger = new Trigger(() => counter++ == 0 ? TimeSpan.Zero : delay);
-            return new Core.Worker.Worker(trigger, func, prepare ?? (token => { }));
+            return new Core.Worker.Worker(trigger, action, prepare ?? (token => { }));
         }
     }
 }
