@@ -4,7 +4,9 @@ namespace Solutions.Core.Worker
     {
         Idle,
         Running,
-        Pending,
-        Cancelling,
+
+        StartPending,
+        StopPending,
+        CancelPending,
     }
 }

@@ -11,7 +11,8 @@ namespace Solutions.Core.Worker
         private readonly Action<CancellationToken> action;
 
         private Task task;
-        private CancellationTokenSource cancellation;
+        private CancellationTokenSource cancelSource;
+        private CancellationTokenSource stopSource;
         public WorkerStatus Status { get; private set; }
 
         private readonly Object critical = new Object();
@@ -37,50 +38,78 @@ namespace Solutions.Core.Worker
             Status = WorkerStatus.Idle;
         }
 
-        private Action Execute()
+        private void Prepare()
         {
-            return () =>
+            try
             {
-                try
-                {
-                    prepare(cancellation.Token);
-                    Status = WorkerStatus.Running;
+                prepare(cancelSource.Token);
+            }
+            finally 
+            {
+                Status = WorkerStatus.Idle;
+            }
+        }
 
-                    while (!cancellation.Token.WaitHandle.WaitOne(trigger()))
-                        action(cancellation.Token);
-                }
-                finally
-                {
-                    Status = WorkerStatus.Idle;
-                }
-            };
+        private void Execute()
+        {
+            try
+            {
+                Status = WorkerStatus.Running;
+                while (!stopSource.Token.WaitHandle.WaitOne(trigger()))
+                    action(cancelSource.Token);
+            }
+            finally
+            {
+                Status = WorkerStatus.Idle;
+            }
         }
 
 #if !V4_0
         public async Task Start()
         {
+            var result = Task.Run(() => { });
             lock (critical)
             {
                 if (Status == WorkerStatus.Idle)
                 {
-                    Status = WorkerStatus.Pending;
-                    cancellation = new CancellationTokenSource();
+                    cancelSource = new CancellationTokenSource();
+                    stopSource = CancellationTokenSource.CreateLinkedTokenSource(new[] {cancelSource.Token});
+                    Status = WorkerStatus.StartPending;
 
-                    task = Task.Run(Execute());
+                    task = new Task(Execute);
+                    result = Task.Run(() =>
+                    {
+                        Prepare();
+                        task.Start();
+                    });
                 }
             }
 
-            await task;           
+            await result;
         }
 
         public async Task Stop()
         {
             lock (critical)
             {
-                if (Status == WorkerStatus.Running || Status == WorkerStatus.Pending)
+                if (Status != WorkerStatus.Idle && Status != WorkerStatus.CancelPending && Status != WorkerStatus.StopPending)
                 {
-                    Status = WorkerStatus.Cancelling;
-                    cancellation.Cancel();
+                    Status = WorkerStatus.StopPending;
+                    stopSource.Cancel();
+                }
+            }
+
+            await task;
+        }
+
+        public async Task Cancel()
+        {
+            lock (critical)
+            {
+                if (Status != WorkerStatus.Idle && Status != WorkerStatus.CancelPending)
+                {
+                    Status = WorkerStatus.CancelPending;
+                    cancelSource.Cancel();
                 }
             }
 
@@ -89,29 +118,53 @@ namespace Solutions.Core.Worker
 #else
         public Task Start()
         {
+            var result = Task.Factory.StartNew(() => { });
             lock (critical)
             {
-                if (Status != WorkerStatus.Idle)
-                    return task;
+                if (Status == WorkerStatus.Idle)
+                {
+                    cancelSource = new CancellationTokenSource();
+                    stopSource = CancellationTokenSource.CreateLinkedTokenSource(new[] {cancelSource.Token});
+                    Status = WorkerStatus.StartPending;
 
-                Status = WorkerStatus.Pending;
-                cancellation = new CancellationTokenSource();
-
-                return task = Task.Factory.StartNew(Execute());
+                    task = new Task(Execute);
+                    result = Task.Factory.StartNew(() =>
+                    {
+                        Prepare();
+                        task.Start();
+                    });
+                }
             }
+
+            return result;
         }
 
         public Task Stop()
         {
             lock (critical)
             {
-                if (Status != WorkerStatus.Running && Status != WorkerStatus.Pending)
-                    return task;
-
-                Status = WorkerStatus.Cancelling;
-                cancellation.Cancel();
-                return task;
+                if (Status != WorkerStatus.Idle && Status != WorkerStatus.CancelPending && Status != WorkerStatus.StopPending)
+                {
+                    Status = WorkerStatus.StopPending;
+                    stopSource.Cancel();
+                } 
             }
+
+            return task;
+        }
+
+        public Task Cancel()
+        {
+            lock (critical)
+            {
+                if (Status != WorkerStatus.Idle && Status != WorkerStatus.CancelPending)
+                {
+                    Status = WorkerStatus.CancelPending;
+                    cancelSource.Cancel();
+                }
+            }
+
+            return task;
         }
 #endif
     }
