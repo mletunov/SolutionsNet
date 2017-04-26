@@ -58,6 +58,10 @@
     <Compile Include="Disposable.cs" />
     <Compile Include="Functional.cs" />
     <Compile Include="IClearable.cs" />
+    <Compile Include="IoC\IBuild.cs" />
+    <Compile Include="IoC\IContext.cs" />
+    <Compile Include="IoC\Registration.cs" />
+    <Compile Include="IoC\IScope.cs" />
     <Compile Include="Locator\ILocator.cs" />
     <Compile Include="Locator\ILocatorBuilder.cs" />
     <Compile Include="Locator\IServiceLocator.cs" />

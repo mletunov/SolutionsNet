@@ -52,6 +52,7 @@
     </Compile>
     <Compile Include="AutofacLocator.cs" />
     <Compile Include="AutofacLocatorBuilder.cs" />
+    <Compile Include="Ioc\AutofacBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
